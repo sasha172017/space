@@ -13,7 +13,14 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-
+        DB::table('user')->insert([
+            'name' => 'Alex',
+            'email' => 'alex@mail.com',
+            'status' => true,
+            'token' => Str::random(60),
+            'date_of_birth' => (new DateTime())->format('Y-m-d'),
+            'password' => \Illuminate\Support\Facades\Hash::make('12345')
+        ]);
         for ($i = 0; $i < 5; $i++) {
             DB::table('user')->insert([
                 'name' => Str::random(5),
@@ -21,7 +28,7 @@ class UserSeeder extends Seeder
                 'status' => true,
                 'token' => Str::random(60),
                 'date_of_birth' => (new DateTime())->format('Y-m-d'),
-                'password' => \Illuminate\Support\Facades\Hash::make('1235')
+                'password' => \Illuminate\Support\Facades\Hash::make('12345')
             ]);
         }
 

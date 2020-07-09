@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 
 class ProductController extends Controller
 {
@@ -24,7 +25,7 @@ class ProductController extends Controller
 
     public function productsByCategory($categoryId)
     {
-        $products = Product::with(['user','images','category'])->where('category_id', '=', $categoryId)->paginate(1);
+        $products = Product::with(['user','images','category'])->where('category_id', $categoryId)->where('status',true)->paginate(5);
         $products->map(function ($product){
             $product->imageFirst = $product->images->sortBy('sort')->take(1)->first();
             $product->makeHidden('images');
@@ -40,7 +41,14 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = json_decode(file_get_contents('php://'), true);
+        $product = new Product();
+        $product->name = '';
+        $product->description = '';
+        $product->created_at = (new \DateTime())->format('Y-m-d H:i:s');
+        $product->shops()->saveMany([
+
+        ]);
     }
 
     /**
@@ -51,7 +59,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with(['user','category','comments','images'])->find($id);
+        $product = Product::with(['user','category','comments','images','tags'])->where('status', true)->find($id);
         if (!$product){
             return response('No Product', 400);
         }

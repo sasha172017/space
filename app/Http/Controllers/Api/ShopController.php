@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class ShopController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -13,7 +15,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        return response(Shop::all()->toJson(), 200);
     }
 
     /**

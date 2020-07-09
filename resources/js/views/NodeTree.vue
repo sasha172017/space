@@ -1,13 +1,14 @@
 <template>
-    <li class="node-tree">
-        <router-link v-if="node.children == false" class="text-dark" :to="{ name: 'categoryShow', params: {id: node.id}}">{{ node.name }}</router-link>
-        <span v-else>{{node.name}}</span>
-        <ul v-if="node.children">
+    <div>
+        <router-link v-if="node.children.length < 1"  class="list-group-item list-group-item-action" :to="{ name: 'categoryShow', params: {id: node.id}}">{{ node.name }}</router-link>
+        <span  class="list-group-item " v-else>{{node.name}}</span>
+        <div v-if="node.children" style="padding-left: 1em">
+            <br>
             <span v-for="child in node.children">
                 <node-tree :node="child"></node-tree>
             </span>
-        </ul>
-    </li>
+        </div>
+    </div>
 </template>
 
 <script>

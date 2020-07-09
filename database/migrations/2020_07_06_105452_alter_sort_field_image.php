@@ -25,6 +25,5 @@ class AlterSortFieldImage extends Migration
      */
     public function down()
     {
-        //
     }
 }

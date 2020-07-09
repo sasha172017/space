@@ -1,17 +1,17 @@
 <template>
     <div class="container">
         <div class="row">
-            <div class="col-12">
+            <div class="col-6">
                 <div class="d-flex">
                     <b-icon icon="three-dots" animation="cylon" class="mx-auto" font-scale="4"
                             v-if="loadingCategories"></b-icon>
                     <b-alert variant="danger" v-if="errorCategories" show>{{errorCategories}}</b-alert>
                 </div>
-                <ul>
-                    <li v-for="category in categories">
+                <div class="list-group">
+                    <div v-for="category in categories">
                         <node-tree :node="category"></node-tree>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -20,11 +20,9 @@
 <script>
     import axios from 'axios'
     import NodeTree from "./NodeTree"
+
     export default {
         components: {NodeTree},
-        beforeCreate: function () {
-            this.$options.components.TreeFolderContents = require('./NodeTree.vue').default
-        },
         name: "Category",
         created() {
             this.fetchCategories();

@@ -11,7 +11,7 @@
                         <img class="card-img-top" v-if="product.imageFirst" :src="'/storage/product/'+product.imageFirst.name">
                         <img class="card-img-top" v-else :src="'/product/not-image.png'">
                         <div class="card-body">
-                            <h5 class="card-title">{{product.name}}</h5>
+                            <h5 class="card-title"><router-link :to="{name: 'productShow', params:{id: product.id}}">{{product.name}}</router-link></h5>
                             <p class="card-text">{{product.description}}</p>
                         </div>
                         <div class="card-footer">
@@ -28,6 +28,7 @@
 
 <script>
     import axios from 'axios';
+
     export default {
         name: "Home",
         watch: {

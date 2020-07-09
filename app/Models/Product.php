@@ -17,7 +17,15 @@ class Product extends Model
     }
 
     public function comments(){
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class)->with('user');
+    }
+
+    public function tags(){
+        return $this->hasMany(Tag::class);
+    }
+
+    public function shops(){
+        return $this->belongsToMany(Shop::class);
     }
 
     public function images(){
