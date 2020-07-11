@@ -6,6 +6,7 @@
                     <b-icon icon="three-dots" animation="cylon" class="mx-auto" font-scale="4"
                             v-if="loading"></b-icon>
                     <b-alert variant="danger" v-if="error" show>{{error}}</b-alert>
+                    <b-alert variant="success" v-if="success" show>{{success}}</b-alert>
                 </div>
                 <div>
                     <b-form @submit="onSubmit" v-if="show">
@@ -84,9 +85,23 @@
                                 stacked
                             ></b-form-radio-group>
                         </b-form-group>
+                        <div v-if="form.shop.selected == 'select'">
                         <b-form-select multiple v-model="form.shop.select.selected"
-                                       v-if="form.shop.selected == 'select'"
                                        :options="form.shop.select.options"></b-form-select>
+                        <b-form-group v-if="form.shop.select.selected.length > 0">
+                        <label>Price:</label>
+                        <div v-for="(shop, index) in form.shop.select.selected">
+                            <span>{{shop.name}}</span>
+                                <b-form-input
+                                    id="input-1"
+                                    type="text"
+                                    v-model="shop.price"
+                                    :key="index"
+                                    required
+                                ></b-form-input>
+                        </div>
+                        </b-form-group>
+                        </div>
                         <div v-if="form.shop.selected == 'new'">
                             <div v-for="(shop, index) in form.shop.new">
                                 <b-form-group>
@@ -108,6 +123,14 @@
                                         type="text"
                                         required
                                     ></b-form-input>
+
+                                    <label>Price:</label>
+                                    <b-form-input
+                                        id="input-1"
+                                        v-model="shop.price"
+                                        :key="index"
+                                        required
+                                    ></b-form-input>
                                 </b-form-group>
                                 <b-form-group>
                                     <label>Description:</label>
@@ -124,6 +147,7 @@
                                 </b-button>
                             </b-col>
                         </div>
+                        <br>
                         <br>
                         <b-button type="submit" variant="primary">Save</b-button>
                     </b-form>
@@ -145,12 +169,13 @@
         },
         data() {
             return {
+                success: false,
                 loading: false,
                 error: null,
                 show: true,
+                images: [],
                 form: {
                     name: '',
-                    images: [],
                     description: '',
                     tags: {
                         advantages: [],
@@ -158,9 +183,7 @@
                     },
                     category: {
                         selected: null,
-                        options: [
-                            {value: null, text: 'Select Category'},
-                        ]
+                        options: []
                     },
                     shop: {
                         selected: 'select',
@@ -169,9 +192,9 @@
                             {text: 'Create Shop', value: 'new'},
                         ],
                         select: {
-                            selected: null,
-                            options: [
-                            ]
+                            price:[],
+                            selected: [],
+                            options: []
                         },
                         new: []
                     }
@@ -183,7 +206,7 @@
             this.getCategories();
         },
         methods: {
-            getCategories(){
+            getCategories() {
                 axios.get('/api/category').then(response => {
                     response.data.forEach(category => {
                         this.form.category.options.push({value: category.id, text: category.name});
@@ -192,10 +215,10 @@
                     this.errorCategories = error.response.data.message || error.message;
                 });
             },
-            getShops(){
+            getShops() {
                 axios.get('/api/shop').then(response => {
                     response.data.forEach(shop => {
-                        this.form.shop.select.options.push({value: shop.id, text: shop.name});
+                        this.form.shop.select.options.push({value: {id: shop.id, name:shop.name, price:''}, text: shop.name});
                     });
                 }).catch(error => {
                     this.errorCategories = error.response.data.message || error.message;
@@ -217,15 +240,31 @@
                 this.form.shop.new.splice(index, 1);
             },
             addShop() {
-                this.form.shop.new.push({name: '', description: '', link: ''});
+                this.form.shop.new.push({name: '', description: '', link: '', price: ''});
             },
             changeImage() {
                 this.images = this.$refs.file.files;
             },
             onSubmit(evt) {
+                this.loading = true;
                 evt.preventDefault();
-                axios.post();
-                alert(JSON.stringify(this.form))
+                var formData = new FormData();
+                for (var i = 0; i < this.images.length; i++) {
+                    formData.append('image' + i, this.images[i]);
+                }
+                    formData.append('form', JSON.stringify(this.form));
+                axios.post('/api/product', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': 'Bearer ' + this.$session.get('token')
+                    }
+                }).then(response =>{
+                    this.loading = false;
+                    this.success = response.data;
+                }).catch(error => {
+                    this.loading = false;
+        this.error = error.response.data.message || error.message;
+    });
             },
         },
         watch: {

@@ -19,7 +19,11 @@
                             <small>Created: {{product.created_at}}</small><br>
                             <small>Author: {{product.user.name + ' ' + product.user.email}}</small><br>
                             <small>Category: {{product.category.name}}</small><br>
-                            <small>Shop: <a :href="product.link">{{product.link}}</a></small>
+                            <small>Shops:
+                                <div v-for="shop in product.shops">
+                                    <small><a :href="shop.link">{{shop.name + ' price - ' + shop.pivot.price}}</a></small>
+                                    <br></div>
+                            </small>
 
                         </div>
                     </div>

@@ -8,4 +8,7 @@ class Shop extends Model
 {
     protected $table = 'shop';
     //
+    public function products(){
+        return $this->belongsToMany(Product::class, 'product_shop');
+    }
 }

@@ -2468,18 +2468,43 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "ProductCreate",
   created: function created() {},
   data: function data() {
     return {
+      success: false,
       loading: false,
       error: null,
       show: true,
+      images: [],
       form: {
         name: '',
-        images: [],
         description: '',
         tags: {
           advantages: [],
@@ -2487,10 +2512,7 @@ __webpack_require__.r(__webpack_exports__);
         },
         category: {
           selected: null,
-          options: [{
-            value: null,
-            text: 'Select Category'
-          }]
+          options: []
         },
         shop: {
           selected: 'select',
@@ -2502,7 +2524,8 @@ __webpack_require__.r(__webpack_exports__);
             value: 'new'
           }],
           select: {
-            selected: null,
+            price: [],
+            selected: [],
             options: []
           },
           "new": []
@@ -2535,7 +2558,11 @@ __webpack_require__.r(__webpack_exports__);
       axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('/api/shop').then(function (response) {
         response.data.forEach(function (shop) {
           _this2.form.shop.select.options.push({
-            value: shop.id,
+            value: {
+              id: shop.id,
+              name: shop.name,
+              price: ''
+            },
             text: shop.name
           });
         });
@@ -2566,16 +2593,37 @@ __webpack_require__.r(__webpack_exports__);
       this.form.shop["new"].push({
         name: '',
         description: '',
-        link: ''
+        link: '',
+        price: ''
       });
     },
     changeImage: function changeImage() {
       this.images = this.$refs.file.files;
     },
     onSubmit: function onSubmit(evt) {
+      var _this3 = this;
+
+      this.loading = true;
       evt.preventDefault();
-      axios__WEBPACK_IMPORTED_MODULE_0___default.a.post();
-      alert(JSON.stringify(this.form));
+      var formData = new FormData();
+
+      for (var i = 0; i < this.images.length; i++) {
+        formData.append('image' + i, this.images[i]);
+      }
+
+      formData.append('form', JSON.stringify(this.form));
+      axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/product', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': 'Bearer ' + this.$session.get('token')
+        }
+      }).then(function (response) {
+        _this3.loading = false;
+        _this3.success = response.data;
+      })["catch"](function (error) {
+        _this3.loading = false;
+        _this3.error = error.response.data.message || error.message;
+      });
     }
   },
   watch: {
@@ -2603,6 +2651,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var lingallery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lingallery */ "./node_modules/lingallery/dist/lingallery.umd.js");
 /* harmony import */ var lingallery__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lingallery__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
 //
 //
 //
@@ -57759,6 +57811,12 @@ var render = function() {
               ? _c("b-alert", { attrs: { variant: "danger", show: "" } }, [
                   _vm._v(_vm._s(_vm.error))
                 ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.success
+              ? _c("b-alert", { attrs: { variant: "success", show: "" } }, [
+                  _vm._v(_vm._s(_vm.success))
+                ])
               : _vm._e()
           ],
           1
@@ -58019,19 +58077,70 @@ var render = function() {
                     ),
                     _vm._v(" "),
                     _vm.form.shop.selected == "select"
-                      ? _c("b-form-select", {
-                          attrs: {
-                            multiple: "",
-                            options: _vm.form.shop.select.options
-                          },
-                          model: {
-                            value: _vm.form.shop.select.selected,
-                            callback: function($$v) {
-                              _vm.$set(_vm.form.shop.select, "selected", $$v)
-                            },
-                            expression: "form.shop.select.selected"
-                          }
-                        })
+                      ? _c(
+                          "div",
+                          [
+                            _c("b-form-select", {
+                              attrs: {
+                                multiple: "",
+                                options: _vm.form.shop.select.options
+                              },
+                              model: {
+                                value: _vm.form.shop.select.selected,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.form.shop.select,
+                                    "selected",
+                                    $$v
+                                  )
+                                },
+                                expression: "form.shop.select.selected"
+                              }
+                            }),
+                            _vm._v(" "),
+                            _vm.form.shop.select.selected.length > 0
+                              ? _c(
+                                  "b-form-group",
+                                  [
+                                    _c("label", [_vm._v("Price:")]),
+                                    _vm._v(" "),
+                                    _vm._l(
+                                      _vm.form.shop.select.selected,
+                                      function(shop, index) {
+                                        return _c(
+                                          "div",
+                                          [
+                                            _c("span", [
+                                              _vm._v(_vm._s(shop.name))
+                                            ]),
+                                            _vm._v(" "),
+                                            _c("b-form-input", {
+                                              key: index,
+                                              attrs: {
+                                                id: "input-1",
+                                                type: "text",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: shop.price,
+                                                callback: function($$v) {
+                                                  _vm.$set(shop, "price", $$v)
+                                                },
+                                                expression: "shop.price"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      }
+                                    )
+                                  ],
+                                  2
+                                )
+                              : _vm._e()
+                          ],
+                          1
+                        )
                       : _vm._e(),
                     _vm._v(" "),
                     _vm.form.shop.selected == "new"
@@ -58084,6 +58193,20 @@ var render = function() {
                                             _vm.$set(shop, "link", $$v)
                                           },
                                           expression: "shop.link"
+                                        }
+                                      }),
+                                      _vm._v(" "),
+                                      _c("label", [_vm._v("Price:")]),
+                                      _vm._v(" "),
+                                      _c("b-form-input", {
+                                        key: index,
+                                        attrs: { id: "input-1", required: "" },
+                                        model: {
+                                          value: shop.price,
+                                          callback: function($$v) {
+                                            _vm.$set(shop, "price", $$v)
+                                          },
+                                          expression: "shop.price"
                                         }
                                       })
                                     ],
@@ -58159,6 +58282,8 @@ var render = function() {
                           2
                         )
                       : _vm._e(),
+                    _vm._v(" "),
+                    _c("br"),
                     _vm._v(" "),
                     _c("br"),
                     _vm._v(" "),
@@ -58287,12 +58412,28 @@ var render = function() {
                       ]),
                       _c("br"),
                       _vm._v(" "),
-                      _c("small", [
-                        _vm._v("Shop: "),
-                        _c("a", { attrs: { href: _vm.product.link } }, [
-                          _vm._v(_vm._s(_vm.product.link))
-                        ])
-                      ])
+                      _c(
+                        "small",
+                        [
+                          _vm._v("Shops:\n                            "),
+                          _vm._l(_vm.product.shops, function(shop) {
+                            return _c("div", [
+                              _c("small", [
+                                _c("a", { attrs: { href: shop.link } }, [
+                                  _vm._v(
+                                    _vm._s(
+                                      shop.name + " price - " + shop.pivot.price
+                                    )
+                                  )
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c("br")
+                            ])
+                          })
+                        ],
+                        2
+                      )
                     ])
                   : _vm._e()
               ]),
