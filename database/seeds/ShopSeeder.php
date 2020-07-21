@@ -38,6 +38,7 @@ class ShopSeeder extends Seeder
                 'product_id' => $productsArray[array_rand($productsArray)],
                 'shop_id' => $shopsArray[array_rand($shopsArray)],
                 'price' => floatval(rand(200,5000)),
+                'link' => 'https//:' . Str::random(10),
             ]);
         }
     }

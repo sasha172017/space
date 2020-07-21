@@ -22,6 +22,7 @@ import CategoryIndex from './views/CategoryIndex'
 import CategoryShow from "./views/CategoryShow"
 import ProductShow from "./views/ProductShow"
 import ProductCreate from "./views/ProductCreate"
+import ProductEdit from "./views/ProductEdit"
 import Login from "./views/Login"
 import VueSession from 'vue-session'
 
@@ -52,6 +53,11 @@ const router = new VueRouter({
             path: '/product/:id',
             name: 'productShow',
             component: ProductShow
+        },
+        {
+            path: '/product/edit/:id',
+            name: 'productEdit',
+            component: ProductEdit
         },
         {
             path: '/login',

@@ -6,6 +6,7 @@
                     <b-icon icon="three-dots" animation="cylon" class="mx-auto" font-scale="4"
                             v-if="loading"></b-icon>
                     <b-alert variant="danger" v-if="error" show>{{error}}</b-alert>
+                    <b-alert variant="success" v-if="success" show>{{success}}</b-alert>
                 </div>
                 <div v-if="product">
                     <div class="row">
@@ -14,14 +15,20 @@
                                         :items="items"/>
                         </div>
                         <div v-if="product" class="col-6">
-                            <h2>{{product.name}}</h2>
+                            <h2>{{product.name}}
+
+                                <router-link :to="{ name: 'productEdit', params: {id: product.id} }" class="text-dark"><b-icon icon="pencil" ></b-icon></router-link>
+
+                                <span style="cursor: pointer"><b-icon icon="trash" @click="removeProduct()"></b-icon></span>
+                            </h2>
                             <p>{{product.description}}</p><br>
                             <small>Created: {{product.created_at}}</small><br>
                             <small>Author: {{product.user.name + ' ' + product.user.email}}</small><br>
                             <small>Category: {{product.category.name}}</small><br>
                             <small>Shops:
                                 <div v-for="shop in product.shops">
-                                    <small><a :href="shop.link">{{shop.name + ' price - ' + shop.pivot.price}}</a></small>
+                                    <small><a :href="shop.pivot.link">{{shop.name}}</a>{{' price - ' +
+                                        shop.pivot.price}}</small>
                                     <br></div>
                             </small>
 
@@ -44,7 +51,8 @@
                             </ul>
                             <span v-else>No Disadvantages</span>
                         </div>
-                    </div><br>
+                    </div>
+                    <br>
                     <div class="row">
                         <div class="col-12">
                             <h2>Comments</h2>
@@ -75,6 +83,7 @@
         name: "ProductShow",
         data() {
             return {
+                success: null,
                 width: 400,
                 height: 300,
                 items: null,
@@ -91,6 +100,28 @@
             this.fetchProduct(this.$route.params.id);
         },
         methods: {
+            removeProduct() {
+                if (confirm("Do you really want to delete?")) {
+                    this.loading = true;
+                    this.error = false;
+                    axios
+                        .delete('/api/product/' + this.product.id, {
+                            headers: {
+                                'Authorization': 'Bearer ' + this.$session.get('token')
+                            }
+                        })
+                        .then(response => {
+                            this.loading = false;
+                            if (response.status == 204) {
+                                this.product = null;
+                                this.success = 'Product Delete';
+                            }
+                        }).catch(error => {
+                        this.loading = false;
+                        this.error = error.response.data.message || error.message;
+                    });
+                }
+            },
             foreachTags(tags) {
                 tags.forEach((tag) => {
                     if (tag.value) {
@@ -128,8 +159,6 @@
                     this.loading = false;
                     this.error = error.response.data.message || error.message;
                 });
-            },
-            fetchProducts() {
             }
         },
         watch: {

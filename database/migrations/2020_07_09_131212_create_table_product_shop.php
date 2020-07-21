@@ -18,6 +18,7 @@ class CreateTableProductShop extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('shop_id');
             $table->float('price')->nullable();
+            $table->string('link')->nullable();
             $table->foreign('product_id')->references('id')->on('product');
             $table->foreign('shop_id')->references('id')->on('shop');
         });

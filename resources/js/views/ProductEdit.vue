@@ -15,7 +15,7 @@
                     <b-alert variant="success" v-if="success" show>{{success}}</b-alert>
                 </div>
                 <div>
-                    <b-form autocomplete="off" @submit="onSubmit" v-if="show">
+                    <b-form autocomplete="off" @submit="onSubmit" v-show="show">
                         <b-form-group
                             id="input-group-1"
                             label="Product Name:"
@@ -28,6 +28,10 @@
                                 required
                                 placeholder="Enter name"
                             ></b-form-input>
+                        </b-form-group>
+                        <b-form-group>
+                            <label>Images:</label>
+                            <images :images="imagesOld"></images>
                         </b-form-group>
                         <b-form-group>
                             <label>Upload images: </label>
@@ -51,7 +55,7 @@
                                 <b-form-input
                                     id="input-1"
                                     v-model="advantages.value"
-                                    :key="index"
+                                    :key="'A'+index"
                                     type="text"
                                     required
                                 ></b-form-input>
@@ -69,7 +73,7 @@
                                 <b-form-input
                                     id="input-1"
                                     v-model="disadvantages.value"
-                                    :key="index"
+                                    :key="'B'+index"
                                     type="text"
                                     required
                                 ></b-form-input>
@@ -103,7 +107,7 @@
                                             id="input-1"
                                             type="text"
                                             v-model="shop.price"
-                                            :key="index"
+                                            :key="'C'+index"
                                             required
                                         ></b-form-input>
                                         <label> Link product: </label>
@@ -111,7 +115,7 @@
                                             id="input-1"
                                             type="text"
                                             v-model="shop.linkProduct"
-                                            :key="index"
+                                            :key="'D'+index"
                                             required
                                         ></b-form-input>
                                     </div>
@@ -125,7 +129,7 @@
                                     <b-form-input
                                         id="input-1"
                                         v-model="shop.name"
-                                        :key="index"
+                                        :key="'E'+index"
                                         type="text"
                                         required
                                     ></b-form-input>
@@ -135,7 +139,7 @@
                                     <b-form-input
                                         id="input-1"
                                         v-model="shop.linkShop"
-                                        :key="index"
+                                        :key="'F'+index"
                                         type="text"
                                         required
                                     ></b-form-input>
@@ -144,7 +148,7 @@
                                     <b-form-input
                                         id="input-1"
                                         v-model="shop.linkProduct"
-                                        :key="index"
+                                        :key="'G'+index"
                                         type="text"
                                         required
                                     ></b-form-input>
@@ -153,7 +157,7 @@
                                     <b-form-input
                                         id="input-1"
                                         v-model="shop.price"
-                                        :key="index"
+                                        :key="'J'+index"
                                         required
                                     ></b-form-input>
                                 </b-form-group>
@@ -173,12 +177,9 @@
                             </b-col>
                         </div>
                         <br>
-                            <b-button type="submit" variant="primary">Save</b-button>
+                        <b-button type="submit" variant="primary">Save</b-button>
                     </b-form>
                     <br>
-<!--                                        <b-card class="mt-3" header="Form Data Result">-->
-<!--                                            <pre class="m-0">{{ form }}</pre>-->
-<!--                                        </b-card>-->
                 </div>
             </div>
         </div>
@@ -187,9 +188,11 @@
 
 <script>
     import axios from 'axios'
+    import Images from './Images'
 
     export default {
         name: "ProductCreate",
+        components:{images: Images},
         created() {
         },
         data() {
@@ -199,6 +202,7 @@
                 error: null,
                 errorValidate: null,
                 show: true,
+                imagesOld: [],
                 images: [],
                 form: {
                     name: '',
@@ -227,10 +231,61 @@
             }
         },
         mounted() {
-            this.getShops();
             this.getCategories();
+            this.fetchProduct(this.$route.params.id);
         },
         methods: {
+            fetchProduct(id) {
+                this.show = false;
+                this.error = null;
+                this.loading = true;
+                axios
+                    .get('/api/product/' + id)
+                    .then(response => {
+                        let product = response.data;
+                        this.loading = false;
+                        this.show = true;
+                        this.form.category.selected = product.category.id;
+                        this.form.name = product.name;
+                        this.form.description = product.description;
+                        this.imagesOld = product.images;
+                        this.foreachTags(product.tags);
+                        this.getShops(product.shops);
+                        this.foreachShops(product.shops);
+                        console.log(response.data);
+                        document.title = 'Edit | ' + product.name;
+                    }).catch(error => {
+                    this.loading = false;
+                    this.error = error.response.data.message || error.message;
+                });
+            },
+            foreachTags(tags) {
+                tags.forEach((tag) => {
+                    if (tag.value) {
+                        this.form.tags.advantages.push({value: tag.name});
+                    } else if (!tag.value) {
+                        this.form.tags.disadvantages.push({value: tag.name});
+                    }
+                });
+            },
+            foreachShops(shops) {
+                shops.forEach((shop) => {
+                    // this.form.shop.select.selected.push({id:shop.id, name:shop.name, price:"",});
+                    this.form.shop.select.selected.push({id:shop.id, name:shop.name, price:shop.pivot.price,linkProduct:shop.pivot.link});
+                });
+            },
+            foreachImage(images) {
+                if (images.length > 0) {
+                    this.items = [];
+                }
+                images.forEach((value) => {
+                    this.items.push({
+                        id: value.id,
+                        src: '/storage/product/' + value.name,
+                        thumbnail: '/storage/product/' + value.name
+                    });
+                });
+            },
             getCategories() {
                 axios.get('/api/category').then(response => {
                     response.data.forEach(category => {
@@ -240,11 +295,19 @@
                     this.errorCategories = error.response.data.message || error.message;
                 });
             },
-            getShops() {
+            getShops(shopsSelected) {
                 axios.get('/api/shop').then(response => {
                     response.data.forEach(shop => {
+                        let price = '';
+                        let linkProduct = '';
+                        shopsSelected.forEach(shopSelected => {
+                            if(shopSelected.id == shop.id){
+                                price = shopSelected.pivot.price;
+                                linkProduct = shopSelected.pivot.link;
+                            }
+                        });
                         this.form.shop.select.options.push({
-                            value: {id: shop.id, name: shop.name, price: ''},
+                            value: {id: shop.id, name: shop.name, price: price, linkProduct: linkProduct},
                             text: shop.name
                         });
                     });
@@ -308,7 +371,8 @@
                         formData.append('shopNew[' + i + '][price]', this.form.shop.new[i].price);
                     }
                 }
-                axios.post('/api/product', formData, {
+                formData.append("_method", "PUT");
+                axios.post('/api/product/' + this.$route.params.id, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': 'Bearer ' + this.$session.get('token')
@@ -316,6 +380,7 @@
                 }).then(response => {
                     this.loading = false;
                     this.success = response.data;
+                    this.show = false;
                 }).catch(error => {
                     this.show = true;
                     this.loading = false;
@@ -332,7 +397,7 @@
             $route: {
                 immediate: true,
                 handler(to, from) {
-                    document.title = to.meta.title || 'Edit Product';
+                    document.title = to.meta.title || 'Create Product';
                 }
             }
         }

@@ -25,10 +25,14 @@ class Product extends Model
     }
 
     public function shops(){
-        return $this->belongsToMany(Shop::class)->withPivot('price');
+        return $this->belongsToMany(Shop::class)->withPivot(['price', 'link']);
     }
 
     public function images(){
         return $this->hasMany(Image::class)->orderBy('sort');
+    }
+
+    public function imagesSortDesc(){
+        return $this->hasMany(Image::class)->orderByDesc('sort');
     }
 }

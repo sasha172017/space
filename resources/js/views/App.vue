@@ -30,7 +30,7 @@
                             <template v-slot:button-content>
                                 <em>User</em>
                             </template>
-                            <b-dropdown-item href="#">Profile</b-dropdown-item>
+                            <b-dropdown-item href="#">{{$parent.name}}</b-dropdown-item>
                             <b-dropdown-item @click="logout()">Log Out</b-dropdown-item>
                         </b-nav-item-dropdown>
                     </div>
